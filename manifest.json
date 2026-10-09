@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "KL Subject Code Replacer",
+  "version": "2.0.0",
+  "description": "Replaces subject codes with full subject names, color-coded session badges, and prominent classroom indicators on KL University ERP.",
+  "permissions": ["storage", "tabs"],
+  "host_permissions": [
+    "*://newerp.kluniversity.in/*",
+    "*://erp.kluniversity.in/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://newerp.kluniversity.in/*",
+        "*://erp.kluniversity.in/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["subject_codes.json"],
+      "matches": [
+        "*://newerp.kluniversity.in/*",
+        "*://erp.kluniversity.in/*"
+      ]
+    }
+  ]
+}

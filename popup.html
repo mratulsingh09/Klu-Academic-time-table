@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KL Subject Code Replacer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 310px;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      user-select: none;
+    }
+
+    /* Header */
+    .header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid #1e293b;
+    }
+    .logo {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 800; color: #fff; flex-shrink: 0;
+      letter-spacing: -0.5px;
+    }
+    .header-text h1 { font-size: 13px; font-weight: 600; color: #f1f5f9; }
+    .header-text p  { font-size: 10px; color: #64748b; margin-top: 2px; }
+
+    /* Section */
+    .section { padding: 12px 16px; border-bottom: 1px solid #1e293b; }
+    .section-label {
+      font-size: 9.5px; font-weight: 700; color: #475569;
+      text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 10px;
+    }
+
+    /* Toggle row */
+    .row { display: flex; align-items: center; justify-content: space-between; }
+    .row-text span { font-size: 13px; font-weight: 500; color: #cbd5e1; }
+    .row-text small { display: block; font-size: 10px; color: #475569; margin-top: 2px; }
+
+    /* Switch */
+    .switch { position: relative; width: 46px; height: 25px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; inset: 0;
+      background: #334155; border-radius: 25px;
+      cursor: pointer; transition: background 0.22s;
+    }
+    .slider::before {
+      content: "";
+      position: absolute;
+      width: 19px; height: 19px; left: 3px; top: 3px;
+      background: #fff; border-radius: 50%;
+      transition: transform 0.22s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    }
+    input:checked + .slider { background: #3b82f6; }
+    input:checked + .slider::before { transform: translateX(21px); }
+
+    /* Status pill */
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 20px;
+      font-size: 11px; margin-top: 10px; transition: all 0.2s;
+    }
+    .status-pill.on  { background: #052e16; color: #4ade80; border: 1px solid #166534; }
+    .status-pill.off { background: #1c1917; color: #78716c; border: 1px solid #292524; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .on  .dot { background: #22c55e; box-shadow: 0 0 5px #22c55e99; }
+    .off .dot { background: #57534e; }
+
+    /* Mode selector */
+    .mode-selector { display: flex; gap: 6px; }
+    .mode-btn {
+      flex: 1; padding: 8px 6px;
+      border-radius: 8px; border: 1px solid #1e293b;
+      background: #1e293b; color: #64748b;
+      font-size: 11px; font-weight: 500; cursor: pointer;
+      text-align: center; transition: all 0.15s; line-height: 1.35;
+    }
+    .mode-btn:hover { border-color: #334155; color: #94a3b8; }
+    .mode-btn.active { background: #1e3a5f; border-color: #3b82f6; color: #93c5fd; }
+    .mode-btn .icon { font-size: 15px; display: block; margin-bottom: 3px; }
+
+    /* Preview box */
+    .preview {
+      margin-top: 10px; padding: 10px;
+      background: #020617; border: 1px solid #1e293b;
+      border-radius: 8px; font-size: 10px;
+    }
+    .preview .lbl  { font-size: 9px; color: #475569; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 3px; }
+    .preview .before { color: #64748b; font-family: monospace; font-size: 10px; word-break: break-all; }
+    .preview .arrow  { color: #3b82f6; text-align: center; margin: 5px 0; font-size: 11px; }
+
+    /* Formatted preview card styling */
+    .pv-card {
+      background: #ffffff;
+      border-radius: 6px;
+      padding: 8px 6px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .pv-title {
+      font-weight: 700;
+      color: #0f172a;
+      font-size: 11px;
+      line-height: 1.25;
+    }
+    .pv-code {
+      font-size: 9.5px;
+      color: #475569;
+      font-weight: 600;
+      margin-top: -2px;
+    }
+    .pv-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      justify-content: center;
+      align-items: center;
+      margin-top: 2px;
+    }
+    .pv-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 9.5px;
+      font-weight: 700;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+    .pv-badge-practical { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .pv-badge-room      { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; font-weight: 800; }
+    .pv-badge-sec       { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+
+
+    /* Footer */
+    .footer { padding: 8px 16px; font-size: 10px; color: #334155; text-align: center; }
+    .footer a { color: #3b82f6; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="logo">KL</div>
+    <div class="header-text">
+      <h1>Subject Code Replacer</h1>
+      <p>KL University ERP</p>
+    </div>
+  </div>
+
+  <!-- Enable / Disable -->
+  <div class="section">
+    <div class="section-label">Extension</div>
+    <div class="row">
+      <div class="row-text">
+        <span>Enable Replacer</span>
+        <small>Formats timetable with badges & rooms</small>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="toggle" />
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="status-pill off" id="status">
+      <div class="dot"></div>
+      <span id="status-text">OFF</span>
+    </div>
+  </div>
+
+  <!-- Display Mode -->
+  <div class="section" id="mode-section">
+    <div class="section-label">Display Mode</div>
+    <div class="mode-selector">
+      <button class="mode-btn" id="mode-name" data-mode="name-only">
+        <span class="icon">📖</span>Name only
+      </button>
+      <button class="mode-btn" id="mode-both" data-mode="code+name">
+        <span class="icon">🔖</span>Code + Name
+      </button>
+    </div>
+
+    <div class="preview">
+      <div class="lbl">Original Cell</div>
+      <div class="before">25CS2101L-P - S-1 -RoomNo-C307</div>
+      <div class="arrow">↓ formatted view</div>
+      <div id="preview-after"></div>
+    </div>
+  </div>
+
+  <!-- Attendance Target -->
+  <div class="section" id="threshold-section">
+    <div class="section-label">Attendance Target</div>
+    <div class="row">
+      <div class="row-text">
+        <span>Minimum Target</span>
+        <small>Attendance threshold for bunks</small>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <input type="number" id="threshold-input" min="50" max="100" value="75" style="width:48px;padding:3px 5px;border-radius:6px;border:1px solid #334155;background:#1e293b;color:#f8fafc;font-weight:700;font-size:12px;text-align:center;outline:none;" />
+        <span style="font-size:12px;color:#94a3b8;font-weight:600">%</span>
+      </div>
+    </div>
+    <div id="att-cache-info" style="font-size:10.5px;color:#64748b;margin-top:8px;line-height:1.4;"></div>
+  </div>
+
+
+  <div class="footer">
+    Works on <a href="https://newerp.kluniversity.in" target="_blank">newerp.kluniversity.in</a>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
